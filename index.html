@@ -393,6 +393,33 @@
             background: rgba(220, 38, 38, 0.1);
         }
 
+        .back-button {
+            font-size: 0.75rem;
+            color: #60a5fa;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+
+        .back-button:hover {
+            color: #93c5fd;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        body.light .back-button {
+            color: #2563eb;
+        }
+
+        body.light .back-button:hover {
+            color: #1d4ed8;
+            background: rgba(37, 99, 235, 0.1);
+        }
+
         .show-all-button {
             display: inline-flex;
             align-items: center;
@@ -740,6 +767,15 @@
                 <p class="results-text" id="resultsText"></p>
             </div>
             <div class="emoji-grid" id="emojiGrid"></div>
+            <div id="showAllContainer" style="text-align: center; margin-top: 2rem; display: none;">
+                <button class="show-all-button" onclick="showAllEmojis()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                    Show All Emojis
+                </button>
+            </div>
             <div id="paginationControls" class="pagination-controls" style="display: none;">
                 <button class="pagination-button" id="prevPage" onclick="previousPage()">Previous</button>
                 <span class="pagination-info" id="pageInfo"></span>
@@ -867,6 +903,7 @@
         const resultsSection = document.getElementById('resultsSection');
         const resultsText = document.getElementById('resultsText');
         const emojiGrid = document.getElementById('emojiGrid');
+        const showAllContainer = document.getElementById('showAllContainer');
         const paginationControls = document.getElementById('paginationControls');
         const pageInfo = document.getElementById('pageInfo');
         const prevPageBtn = document.getElementById('prevPage');
@@ -941,6 +978,12 @@
             updateDisplay();
         }
 
+        function closeShowAll() {
+            showingAll = false;
+            currentPage = 1;
+            updateDisplay();
+        }
+
         function getPaginatedEmojis(emojis) {
             if (!showingAll || emojis.length <= itemsPerPage) {
                 return emojis;
@@ -993,6 +1036,7 @@
             if (filteredEmojis.length === 0) {
                 emptyState.style.display = 'block';
                 resultsSection.style.display = 'none';
+                showAllContainer.style.display = 'none';
 
                 if (searchTerm.trimEnd()) {
                     // No search results
@@ -1032,7 +1076,12 @@
                 if (searchTerm.trimEnd()) {
                     resultsText.innerHTML = `${filteredEmojis.length} emoji${filteredEmojis.length !== 1 ? 's' : ''} found for "${searchTerm.trimEnd()}"`;
                 } else if (showingAll) {
-                    resultsText.innerHTML = `All emojis (${filteredEmojis.length} total)`;
+                    resultsText.innerHTML = `
+                        <div class="recent-header">
+                            All emojis (${filteredEmojis.length} total)
+                            <button class="back-button" onclick="closeShowAll()">← back</button>
+                        </div>
+                    `;
                 } else {
                     resultsText.innerHTML = `
                         <div class="recent-header">
@@ -1044,6 +1093,13 @@
 
                 // Update pagination
                 updatePagination(filteredEmojis.length);
+
+                // Show/hide the show all button
+                if (!searchTerm.trimEnd() && !showingAll && recentEmojis.length > 0) {
+                    showAllContainer.style.display = 'block';
+                } else {
+                    showAllContainer.style.display = 'none';
+                }
 
                 // Update emoji grid
                 emojiGrid.innerHTML = '';

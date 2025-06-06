@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <title>EmojiFind</title>
+    <meta name="description" content="Find any emoji instantly with EmojiFind - the fastest way to search, copy, and use emojis. Beautiful interface with dark/light themes and recent emoji history.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%238b5cf6;stop-opacity:1' /><stop offset='100%25' style='stop-color:%2306b6d4;stop-opacity:1' /></linearGradient></defs><circle cx='35' cy='35' r='20' fill='none' stroke='url(%23grad)' stroke-width='6'/><circle cx='35' cy='35' r='12' fill='url(%23grad)' opacity='0.3'/><path d='M50 50 L70 70' stroke='url(%23grad)' stroke-width='6' stroke-linecap='round'/><circle cx='35' cy='30' r='3' fill='white' opacity='0.8'/></svg>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:title" content="EmojiFind - Find Any Emoji Instantly">
+    <meta property="og:description" content="The fastest way to search, copy, and use emojis. Beautiful interface with dark/light themes and recent emoji history.">
+    <meta property="og:image" content="http://emojifind.dumbprojects.com/images/og-image.svg">
+    <meta property="og:site_name" content="EmojiFind">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yourdomain.com/">
+    <meta property="twitter:title" content="EmojiFind - Find Any Emoji Instantly">
+    <meta property="twitter:description" content="The fastest way to search, copy, and use emojis. Beautiful interface with dark/light themes and recent emoji history.">
+    <meta property="twitter:image" content="http://emojifind.dumbprojects.com/images/og-image.svg">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            background-color: #0f172a;
+            color: #ffffff;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* Mobile viewport handling */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        body.light {
+            background-color: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+            background: rgba(15, 23, 42, 0.85);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            /* Safe area for mobile */
+            padding-top: env(safe-area-inset-top);
+        }
+
+        body.light .header {
+            background: rgba(248, 250, 252, 0.85);
+            border-bottom-color: rgba(148, 163, 184, 0.15);
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem 1rem;
+            }
+        }
+
+        .theme-toggle-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .theme-toggle {
+            padding: 0.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.4);
+            transition: color 0.3s ease;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .theme-toggle:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .theme-toggle:active {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .theme-toggle:focus {
+            outline: none;
+        }
+
+        body.light .theme-toggle {
+            color: rgba(71, 85, 105, 0.4);
+        }
+
+        body.light .theme-toggle:hover {
+            color: rgba(71, 85, 105, 0.7);
+        }
+
+        body.light .theme-toggle:active {
+            color: rgba(71, 85, 105, 0.8);
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        @media (max-width: 640px) {
+            .title {
+                font-size: 2rem;
+            }
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        body.light .subtitle {
+            color: #64748b;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 640px) {
+            .search-container {
+                margin-bottom: 1.5rem;
+            }
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            pointer-events: none;
+            color: #ffffff;
+            transition: color 0.3s ease;
+            z-index: 2;
+            opacity: 0.8;
+        }
+
+        body.light .search-icon {
+            color: #1e293b;
+            opacity: 0.7;
+        }
+
+        .clear-search {
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.5rem;
+            height: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+        }
+
+        .clear-search:hover {
+            color: #cbd5e1;
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .clear-search:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        body.light .clear-search {
+            color: #64748b;
+        }
+
+        body.light .clear-search:hover {
+            color: #475569;
+            background: rgba(148, 163, 184, 0.1);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.25rem 4rem 1.25rem 3.5rem;
+            font-size: 1.125rem;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1.25rem;
+            outline: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: rgba(30, 41, 59, 0.6);
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            font-weight: 500;
+        }
+
+        @media (max-width: 640px) {
+            .search-input {
+                padding: 1rem 3.5rem 1rem 3rem;
+                font-size: 1rem;
+            }
+        }
+
+        .search-input::placeholder {
+            color: #94a3b8;
+            transition: color 0.3s ease;
+            font-weight: 400;
+        }
+
+        .search-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        body.light .search-input {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(148, 163, 184, 0.3);
+            color: #1e293b;
+        }
+
+        body.light .search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        body.light .search-input:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #8b5cf6;
+        }
+
+        .content {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 0 1rem 2rem 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .content {
+                padding: 0 1rem 1rem 1rem;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        @media (max-width: 640px) {
+            .empty-state {
+                padding: 3rem 1rem;
+            }
+        }
+
+        .empty-emoji {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .empty-emoji {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #cbd5e1;
+            transition: color 0.3s ease;
+            font-weight: 600;
+        }
+
+        .empty-subtitle {
+            font-size: 1rem;
+            color: #94a3b8;
+            transition: color 0.3s ease;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .results-text {
+            font-size: 0.875rem;
+            color: #cbd5e1;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        body.light .empty-title {
+            color: #475569;
+        }
+
+        body.light .empty-subtitle {
+            color: #64748b;
+        }
+
+        body.light .results-text {
+            color: #475569;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            .results-header {
+                margin-bottom: 1rem;
+            }
+        }
+
+        .recent-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .clear-button {
+            font-size: 0.75rem;
+			color: #f87171;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
+
+        .clear-button:hover {
+            color: #fca5a5;
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        body.light .clear-button {
+            color: #dc2626;
+        }
+
+        body.light .clear-button:hover {
+            color: #991b1b;
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 640px) {
+            .emoji-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .emoji-grid {
+                grid-template-columns: repeat(9, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .emoji-grid {
+                grid-template-columns: repeat(10, 1fr);
+                gap: 1.25rem;
+            }
+        }
+
+        .emoji-button {
+            position: relative;
+            aspect-ratio: 1;
+            border: 2px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1.25rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            user-select: none;
+            transform: scale(1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: rgba(30, 41, 59, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            /* Better touch targets for mobile */
+            min-height: 3.5rem;
+        }
+
+        @media (min-width: 640px) {
+            .emoji-button {
+                font-size: 2rem;
+                min-height: 4rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .emoji-button {
+                font-size: 2.25rem;
+                min-height: 4.5rem;
+            }
+        }
+
+        .emoji-button:hover {
+            background: rgba(51, 65, 85, 0.8);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-2px) scale(1.02);
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .emoji-button:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        body.light .emoji-button {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        body.light .emoji-button:hover {
+            background: rgba(248, 250, 252, 0.95);
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .copy-feedback {
+            position: absolute;
+            inset: 0;
+            background: rgba(34, 197, 94, 0.95);
+            border-radius: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            animation: copyFeedback 0.6s ease-out;
+        }
+
+        @keyframes copyFeedback {
+            0% {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .check-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            stroke-width: 3;
+        }
+
+        @media (min-width: 640px) {
+            .check-icon {
+                width: 1.5rem;
+                height: 1.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .check-icon {
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+        }
+
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        /* iOS-style bounce effect for mobile interactions */
+        @media (max-width: 640px) {
+            .emoji-button:active {
+                transform: scale(0.95);
+                transition: transform 0.1s ease;
+            }
+            
+            .clear-search:active {
+                transform: translateY(-50%) scale(0.9);
+                transition: transform 0.1s ease;
+            }
+        }
+
+        /* Improved focus states for accessibility */
+        .search-input:focus,
+        .clear-search:focus,
+        .emoji-button:focus {
+            outline: 2px solid #8b5cf6;
+            outline-offset: 2px;
+        }
+
+        /* Smooth scrolling for better mobile experience */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        body::-webkit-scrollbar {
+            width: 0;
+            background: transparent;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+
+        .loading-spinner {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid rgba(148, 163, 184, 0.3);
+            border-top: 3px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #resultsSection {
+        	padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="theme-toggle-container">
+                <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                    <svg class="icon" id="themeIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" style="color: #fbbf24;"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="title-section">
+                <h1 class="title">🔍 EmojiFind</h1>
+                <p class="subtitle">Find any emoji instantly</p>
+            </div>
+            
+            <div class="search-container">
+                <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search for emojis..." autocomplete="off">
+                <button class="clear-search" id="clearSearch" style="display: none;" title="Clear search">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner"></div>
+            <p class="empty-title">Loading emojis...</p>
+            <p class="empty-subtitle">Please wait while we load the emoji database</p>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-emoji">👋</div>
+            <p class="empty-title">Welcome to EmojiFind!</p>
+            <p class="empty-subtitle">Start by searching for emojis above. Your recently copied emojis will appear here for quick access.</p>
+        </div>
+
+        <div id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <p class="results-text" id="resultsText"></p>
+            </div>
+            <div class="emoji-grid" id="emojiGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTheme = 'dark';
+        let recentEmojis = [];
+        let filteredEmojis = [];
+        let copiedEmoji = null;
+        let emojiDatabase = []; // Will be loaded from JSON
+
+        // Load emoji database from JSON file
+        async function loadEmojiDatabase() {
+            try {
+                const response = await fetch('./data/emojis.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to load emoji database: ${response.status}`);
+                }
+                emojiDatabase = await response.json();
+                console.log(`✅ Loaded ${emojiDatabase.length} emojis from database`);
+                return true;
+            } catch (error) {
+                console.error('❌ Error loading emoji database:', error);
+                // Fallback to a minimal set if JSON fails to load
+                emojiDatabase = [
+                    { emoji: '😀', keywords: ['happy', 'smile', 'grin', 'joy', 'cheerful', 'face'] },
+                    { emoji: '😢', keywords: ['cry', 'sad', 'tear', 'upset', 'face'] },
+                    { emoji: '❤️', keywords: ['heart', 'love', 'red'] },
+                    { emoji: '👍', keywords: ['thumbs up', 'good', 'approve', 'like'] },
+                    { emoji: '🎉', keywords: ['party', 'celebration', 'confetti', 'happy'] },
+                    { emoji: '🔥', keywords: ['fire', 'flame', 'hot', 'lit'] },
+                    { emoji: '💯', keywords: ['hundred points', 'perfect', 'score'] },
+                    { emoji: '🚀', keywords: ['rocket', 'space', 'launch', 'fast'] },
+                    { emoji: '⭐', keywords: ['star', 'favorite', 'special'] },
+                    { emoji: '🌟', keywords: ['glowing star', 'sparkle', 'shine'] }
+                ];
+                console.log('🔄 Using fallback emoji set');
+                return false;
+            }
+        }
+
+        // Storage utility with localStorage fallback to in-memory
+        const storage = {
+            isAvailable() {
+                try {
+                    const test = '__localStorage_test__';
+                    localStorage.setItem(test, test);
+                    localStorage.removeItem(test);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            },
+
+            getRecentEmojis() {
+                if (this.isAvailable()) {
+                    try {
+                        const stored = localStorage.getItem('recentEmojis');
+                        return stored ? JSON.parse(stored) : [];
+                    } catch (e) {
+                        return [];
+                    }
+                }
+                return [];
+            },
+
+            setRecentEmojis(emojis) {
+                if (this.isAvailable()) {
+                    try {
+                        localStorage.setItem('recentEmojis', JSON.stringify(emojis));
+                    } catch (e) {
+                        // localStorage failed, fallback to memory
+                    }
+                }
+            },
+
+            getTheme() {
+                if (this.isAvailable()) {
+                    try {
+                        return localStorage.getItem('emojiFindTheme') || 'dark';
+                    } catch (e) {
+                        return 'dark';
+                    }
+                }
+                return 'dark';
+            },
+
+            setTheme(theme) {
+                if (this.isAvailable()) {
+                    try {
+                        localStorage.setItem('emojiFindTheme', theme);
+                    } catch (e) {
+                        // localStorage failed, fallback to memory
+                    }
+                }
+            }
+        };
+
+        // DOM elements
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+        const loadingState = document.getElementById('loadingState');
+        const emptyState = document.getElementById('emptyState');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsText = document.getElementById('resultsText');
+        const emojiGrid = document.getElementById('emojiGrid');
+
+        // Theme management
+        function updateThemeIcon() {
+            if (currentTheme === 'dark') {
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" style="color: #fbbf24;"></path>';
+            } else {
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" style="color: #6b7280;"></path>';
+            }
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            if (currentTheme === 'light') {
+                body.classList.add('light');
+            } else {
+                body.classList.remove('light');
+            }
+            storage.setTheme(currentTheme);
+            updateThemeIcon();
+        }
+
+        // Search and filter functions
+        function updateClearButton() {
+            if (searchInput.value.trim()) {
+                clearSearch.style.display = 'flex';
+            } else {
+                clearSearch.style.display = 'none';
+            }
+        }
+
+        function clearSearchInput() {
+            searchInput.value = '';
+            updateClearButton();
+            updateDisplay();
+            searchInput.focus();
+        }
+
+        function filterEmojis(searchTerm) {
+            const trimmedSearch = searchTerm.trimEnd();
+            
+            if (trimmedSearch === '') {
+                if (recentEmojis.length > 0) {
+                    const recentEmojiObjects = recentEmojis.map(emoji => 
+                        emojiDatabase.find(item => item.emoji === emoji)
+                    ).filter(Boolean);
+                    return recentEmojiObjects;
+                } else {
+                    return [];
+                }
+            } else {
+                const filtered = emojiDatabase.filter(item =>
+                    item.keywords.some(keyword =>
+                        keyword.toLowerCase().includes(trimmedSearch.toLowerCase())
+                    )
+                );
+                return filtered.slice(0, 100);
+            }
+        }
+
+        function updateDisplay() {
+            const searchTerm = searchInput.value;
+            filteredEmojis = filterEmojis(searchTerm);
+            updateClearButton();
+            
+            // Hide loading state
+            loadingState.style.display = 'none';
+            
+            if (filteredEmojis.length === 0) {
+                emptyState.style.display = 'block';
+                resultsSection.style.display = 'none';
+                
+                if (searchTerm.trimEnd()) {
+                    // No search results
+                    emptyState.innerHTML = `
+                        <div class="empty-emoji">🤔</div>
+                        <p class="empty-title">No emojis found for "${searchTerm.trimEnd()}"</p>
+                        <p class="empty-subtitle">Try searching for something like "happy", "food", or "animal"</p>
+                    `;
+                } else {
+                    // Welcome state
+                    emptyState.innerHTML = `
+                        <div class="empty-emoji">👋</div>
+                        <p class="empty-title">Welcome to EmojiFind!</p>
+                        <p class="empty-subtitle">Start by searching for emojis above. Your recently copied emojis will appear here for quick access.</p>
+                    `;
+                }
+            } else {
+                emptyState.style.display = 'none';
+                resultsSection.style.display = 'block';
+                
+                // Update results header
+                if (searchTerm.trimEnd()) {
+                    resultsText.innerHTML = `${filteredEmojis.length} emoji${filteredEmojis.length !== 1 ? 's' : ''} found for "${searchTerm.trimEnd()}"`;
+                } else {
+                    resultsText.innerHTML = `
+                        <div class="recent-header">
+                            Recently copied emojis
+                            <button class="clear-button" onclick="clearRecentEmojis()">clear</button>
+                        </div>
+                    `;
+                }
+                
+                // Update emoji grid
+                emojiGrid.innerHTML = '';
+                filteredEmojis.forEach((item, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'emoji-button';
+                    button.innerHTML = `<span>${item.emoji}</span>`;
+                    button.title = `Copy ${item.emoji} - ${item.keywords.slice(0, 3).join(', ')}`;
+                    button.onclick = () => copyEmoji(item.emoji);
+                    emojiGrid.appendChild(button);
+                });
+            }
+        }
+
+        // Copy functionality
+        async function copyEmoji(emoji) {
+            try {
+                await navigator.clipboard.writeText(emoji);
+                showCopyFeedback(emoji);
+            } catch (err) {
+                // Fallback for browsers that don't support clipboard API
+                const textArea = document.createElement('textarea');
+                textArea.value = emoji;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showCopyFeedback(emoji);
+            }
+            
+            // Add to recent emojis (max 20)
+            const updatedRecentEmojis = [emoji, ...recentEmojis.filter(e => e !== emoji)].slice(0, 20);
+            recentEmojis = updatedRecentEmojis;
+            storage.setRecentEmojis(updatedRecentEmojis);
+        }
+
+        function showCopyFeedback(emoji) {
+            copiedEmoji = emoji;
+            
+            // Find the button that was clicked and show feedback
+            const buttons = document.querySelectorAll('.emoji-button');
+            buttons.forEach(button => {
+                if (button.querySelector('span').textContent === emoji) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'copy-feedback';
+                    feedback.innerHTML = '<svg class="check-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    button.appendChild(feedback);
+                    
+                    setTimeout(() => {
+                        feedback.remove();
+                        copiedEmoji = null;
+                    }, 1000);
+                }
+            });
+        }
+
+        function clearRecentEmojis() {
+            recentEmojis = [];
+            storage.setRecentEmojis([]);
+            updateDisplay();
+        }
+
+        // Event listeners
+        themeToggle.addEventListener('click', toggleTheme);
+        searchInput.addEventListener('input', updateDisplay);
+        clearSearch.addEventListener('click', clearSearchInput);
+        
+        // Hide keyboard on mobile when Enter is pressed
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchInput.blur(); // This hides the mobile keyboard
+            }
+        });
+
+        // Initialize
+        async function init() {
+            try {
+                // Load emoji database first
+                const loaded = await loadEmojiDatabase();
+                
+                // Load saved data
+                recentEmojis = storage.getRecentEmojis();
+                currentTheme = storage.getTheme();
+                
+                // Apply theme
+                if (currentTheme === 'light') {
+                    body.classList.add('light');
+                } else {
+                    body.classList.remove('light');
+                }
+                updateThemeIcon();
+                
+                // Initial display
+                updateDisplay();
+                
+                // Focus search input
+                searchInput.focus();
+                
+                // Log success message
+                if (loaded) {
+                    console.log('✅ EmojiFind initialized successfully with full database');
+                } else {
+                    console.log('⚠️ EmojiFind initialized with fallback database');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize EmojiFind:', error);
+                
+                // Show error state
+                loadingState.innerHTML = `
+                    <div class="empty-emoji">😞</div>
+                    <p class="empty-title">Failed to load EmojiFind</p>
+                    <p class="empty-subtitle">Please refresh the page to try again</p>
+                `;
+            }
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>

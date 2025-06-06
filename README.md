@@ -72,12 +72,10 @@ This will create the `emojis.json` file with a comprehensive emoji database incl
 - **Safe Areas** - Respects iPhone notches and Android navigation
 - **iOS Styling** - Native-feeling bounce effects and interactions
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+[MIT License](LICENSE)
 
----
+## AI Assistance Disclosure
 
-**Made with ❤️ and lots of ☕** 
-
-*Star ⭐ this repo if you find it useful!*
+This tool was developed with assistance from AI language models.

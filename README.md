@@ -78,4 +78,4 @@ This will create the `emojis.json` file with a comprehensive emoji database incl
 
 ## AI Assistance Disclosure
 
-This tool was developed with assistance from AI language models.
+This project was created with the help of AI.

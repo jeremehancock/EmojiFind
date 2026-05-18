@@ -76,6 +76,6 @@ This will create the `emojis.json` file with a comprehensive emoji database incl
 
 [MIT License](LICENSE)
 
-## AI Assistance Disclosure
+## AI Disclosure
 
 This project was created with the help of AI.
